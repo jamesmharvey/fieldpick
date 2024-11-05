@@ -66,7 +66,7 @@ def save_frame(frame, save_file):
     else:
         existing_content = None
 
-    if existing_content.equals(frame):
+    if existing_content is not None and existing_content.equals(frame):
         logger.info(f"Skipping save of {file_path} - no changes")
         return
     else:
