@@ -36,9 +36,6 @@ def common_constraints(prob, slots_vars, teams, slot_ids, working_slots):
     # Limit games per week
     prob = limit_weekday_games_per_week(prob, teams, working_slots, slots_vars, limit=1)
 
-    # Everyone plays in week 1
-    prob =  everyone_plays_week1(prob, teams, working_slots, slots_vars, limit=1)  
-
     return prob
 
 def same_opponent(prob, slots_vars, teams, slot_ids):

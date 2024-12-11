@@ -74,7 +74,7 @@ non_blocked = not_opening_day & not_day_off & before_last_week
 
 
 # Prescribed slots
-divisions = [division,  "Minors AAA"]
+divisions = [division]
 
 prescribed_fields = cleanFrame["Intended_Division"].isin(divisions)
 print(f"Prescribed Slots2: {prescribed_fields.sum()}")
@@ -129,10 +129,10 @@ prob = minimum_faceoffs(prob, slots_vars, teams, slot_ids, limit=1)
 prob = limit_faceoffs(prob, slots_vars, teams, slot_ids, limit=2)
 prob = limit_games_per_week(prob, weeks, working_slots, slots_vars, teams, limit=2)
 
-prob = minimum_games_per_team(prob, teams, slots_vars, slot_ids, min_games=10)
-prob = maximum_games_per_team(prob, teams, slots_vars, slot_ids, max_games=15)
+prob = minimum_games_per_team(prob, teams, slots_vars, slot_ids, min_games=14)
+prob = maximum_games_per_team(prob, teams, slots_vars, slot_ids, max_games=14)
 
-prob = early_starts(prob, teams, slots_vars, early_slots, min=2, max=4)
+prob = early_starts(prob, teams, slots_vars, early_slots, min=1, max=4)
 
 # # # Balance fields
 prob = balance_fields(prob, teams, games_per_team, working_slots, slots_vars, fudge=2)
@@ -141,12 +141,12 @@ prob = balance_fields(prob, teams, games_per_team, working_slots, slots_vars, fu
 # prob = field_limits(prob, teams, working_slots, slots_vars, "Tepper - Field 1", min=1, max=5, variation="TEPPER_MIN")
 # prob = field_limits(prob, teams, working_slots, slots_vars, "Ketcham - Field 1", min=1, max=5, variation="KETCHAM_MIN")
 
-prob = field_limits(prob, teams, working_slots, slots_vars, "West Sunset - Field 3", min=1, max=9, variation="KETCHAM_MIN")
-prob = field_limits(prob, teams, working_slots, slots_vars, "Kimbell - Diamond 1", min=1, max=9, variation="KETCHAM_MIN")
+# prob = field_limits(prob, teams, working_slots, slots_vars, "West Sunset - Field 3", min=1, max=9, variation="KETCHAM_MIN")
+# prob = field_limits(prob, teams, working_slots, slots_vars, "Kimbell - Diamond 1", min=1, max=9, variation="KETCHAM_MIN")
 
 
 
-prob = min_weekends(prob, teams, working_slots, slots_vars, min=6)
+prob = min_weekends(prob, teams, working_slots, slots_vars, min=5)
 
 
 # Prefer tepper on weekends
@@ -161,7 +161,7 @@ for j in teams:
             lpSum([slots_vars[i, j, k] for i in tepper_weekend_slots] for k in teams)  # home team on tepper weekend
             + lpSum([slots_vars[i, k, j] for i in tepper_weekend_slots] for k in teams) # away team on tepper weekend
         )
-        >= 6,
+        >= 3,
         f"get_tepper_weekend_team_{j}",
     )
 
@@ -178,7 +178,7 @@ for j in teams:
             lpSum([slots_vars[i, j, k] for i in tepper_weekend_slots] for k in teams)  # home team on tepper weekend
             + lpSum([slots_vars[i, k, j] for i in tepper_weekend_slots] for k in teams) # away team on tepper weekend
         )
-        >= 12,
+        >= 4,
         f"get_tepper_min_team_{j}",
     )
 

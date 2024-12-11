@@ -8,7 +8,7 @@ def date_string_to_datetime(date):
     return datetime.strptime(date, "%m/%d/%Y")
 
 
-start_date = date_string_to_datetime("3/2/2024")
+start_date = date_string_to_datetime("3/1/2025")
 
 week_split_data = {}
 for week in range(1, 20):
@@ -17,40 +17,39 @@ for week in range(1, 20):
 
 
 blackout_dates = [
-    "4/7/2024",  # Giants
-    "3/30/2024",  # Easter Weekend
-    "3/31/2024",  # Easter Weekend
-    "5/25/2024",  # Memorial Day Weekend
-    "5/26/2024",
-    "5/27/2024",
+    "4/20/2025",  # Easter Sunday
+    "5/24/2025",  # Memorial Day Weekend
+    "5/25/2025",
+    "5/26/2025",
 ]
 # Datetime conversion for blackouts
 blackout_days = [date_string_to_datetime(item) for item in blackout_dates]
 
 division_info = {
     "Tee Ball": {
-        "teams": 12,
-        "weekend_pattern": [0, 7, 7, 7, 7, 0, 7, 7, 7, 7, 7, 7, 0],
+        "teams": 14,
+        "weekend_pattern": [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 0],
         "preferred_days": ["Saturday"],
         "time_length": "90",
         "random_seed": 1737,
         "max_loops": 10,
+        "al_nl_split": False,
 
     },
     "Lower Farm": {
         "teams": 12,
-        "weekend_pattern": [6, 6, 6, 6, 6, 0, 6, 6, 6, 6, 6, 6, 0],
-        "preferred_days": ["Sunday"],
+        "weekend_pattern": [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0],
+        "preferred_days": ["Sunday", "Saturday"], # Special Schedule Saturday 3/1, 4/5, 4/19
         "time_length": "120",
         "random_seed": 1582,
         "max_loops": 10,
+        "al_nl_split": False,
     },
     "Upper Farm": {
         "teams": 12,
-        "weekend_pattern": [7, 7, 7, 7, 7, 0, 7, 7, 7, 7, 7, 7, 0],
+        "weekend_pattern": [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 0],
         "preferred_days": [
-            ["Sunday"],
-            ["Saturday"],
+            ["Sunday", "Saturday"],  # Special Schedule Saturday 3/1, 4/5, 4/19
         ],
         "time_length": "120",
         "preferred_fields": [
@@ -65,42 +64,38 @@ division_info = {
         ],
         "random_seed": 1879,
         "max_loops": 10,
+        "al_nl_split": False,
     },
-    "Rookie": {
-        "teams": 10,  # 1  2  3  4  TI E  7  8  9  10 11 12 13
-        "weekend_pattern": [2, 6, 6, 6, 7, 0, 6, 6, 6, 0, 0, 0, 0],
-        "weekday_pattern": [0, 0, 2, 1, 0, 0, 2, 1, 2, 0, 0, 0, 0],
+    "Rookie": {           # 1  8  15 22 29 5  12 19 26 3  10 17 24
+        "teams": 10,      # 1  2  3  4  5  6G 7  8E 9  10 11 12 13
+        "weekend_pattern": [0, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0],
+        "weekday_pattern": [0, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0], # 2.5 weeknight slots
         "preferred_days": [
             [
                 "Saturday",
                 "Sunday",
             ],
-            ["Saturday", "Sunday", "Tuesday", "Wednesday", "Thursday"],
+            ["Saturday", "Sunday","Thursday", "Friday"],
         ],
-        "dedicated_ti_weekend": 5,
+        "games": 12,
+        "ti_weekday": 0,
+        "time_length": "150",
         "preferred_fields": [
             [
-                "Rossi Park #1",
-                "Ft. Scott - South",
-                "Kimbell D3 SW",
-                "South Sunset D1 North",
+                "Tepper - Field 1",
+                "Rossi - Field 1",
+                "Potrero - D2",
+                "Fort Scott - South Diamond",
+                "South Sunset - Diamond 2",
             ],
-            ["Rossi Park #1", "South Sunset D2 South", "Ft. Scott - North", "Ft. Scott - South", "Kimbell D3 SW"],
-            [None],
         ],
-        "games": 11,
-        "day_off": "Friday",
-        "ti_weekday": 0,
-
-
-        "time_length": "150",
         "random_seed": 3127,  # 1.729 with seed 1936
         "max_loops": 10,
+        "al_nl_split": True,
     },
     "Minors AA": {
-        "games": 10,
-        "day_off": "Wednesday",
-        "ti_weekday": 2,
+        "games": 12,
+        "ti_weekday": 0,
         "preferred_fields": [
             [
                 "Rossi Park #1",
@@ -110,20 +105,26 @@ division_info = {
             ],
             [None],
         ],
+        "preferred_days": [
+            [
+                "Saturday",
+                "Sunday",
+            ],
+            ["Saturday", "Sunday","Thursday", "Friday"],
+        ],
         "teams": 10,
-        "weekend_pattern": [2, 5, 5, 5, 5, 0, 5, 5, 5, 0, 0, 0, 0],
-        "weekday_pattern": [0, 1, 1, 2, 2, 4, 2, 1, 2, 0, 0, 0, 0],
-        "dedicated_ti_weekend": 7,
+        "weekend_pattern": [0, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0],
+        "weekday_pattern": [0, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0], # 2.5 weeknight slots
         "time_length": "150",
         #"random_seed": 10511,
 
         "random_seed": 10511,
         "max_loops": 200,
         "denied_fields": ["Kimbell D3 SW"],
+        "al_nl_split": True,
     },
     "Minors AAA": {
-        "games": 10,
-        "day_off": "Tuesday",
+        "games": 12,
         "ti_weekday": 3,
 
 
@@ -137,21 +138,19 @@ division_info = {
         ],
         "preferred_days": [
             ["Saturday", "Sunday"],
-            ["Wednesday", "Thursday", "Friday"],
-            ["Saturday", "Sunday", "Tuesday"],
+            ["Monday", "Thursday"],
         ],
         "teams": 10,
-        "weekend_pattern": [3, 4, 4, 4, 4, 0, 4, 4, 4, 0, 0, 0, 0],
-        "weekday_pattern": [0, 0, 2, 2, 2, 4, 2, 2, 2, 0, 0, 0, 0],
-        "dedicated_ti_weekend": 8,
+        "weekend_pattern": [0, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0],
+        "weekday_pattern": [0, 3, 3, 3, 3, 3, 3, 3, 3, 0, 0, 0, 0], # 2.5 weeknight slots
         "time_length": "150",
         "random_seed": 1975,  # 1.040 with seed 567
         "max_loops": 200,
         "denied_fields": ["Kimbell D3 SW", "Ft. Scott - South"],
+        "al_nl_split": True,
     },
     "Majors": {
-        "games": 15,
-        "day_off": "Thursday",
+        "games": 14,
         "ti_weekday": 4,
 
         "preferred_fields": [
@@ -169,23 +168,55 @@ division_info = {
             ["Saturday", "Sunday", "Tuesday"],
         ],
         "teams": 10,
-        "weekend_pattern": [5, 5, 5, 5, 5, 0, 5, 5, 5, 0, 0, 0, 0],
-        "weekday_pattern": [5, 4, 4, 4, 4, 5, 4, 4, 4, 0, 0, 0, 0],
+        "weekend_pattern": [5, 5, 5, 5, 5, 0, 5, 0, 5, 0, 0, 0, 0],
+        "weekday_pattern": [0, 5, 5, 5, 5, 5, 5, 5, 5, 0, 0, 0, 0],
         "time_length": "150",
         "random_seed": 292,  # 1.579 with seed 292
         "max_loops": 200,
         "denied_fields": ["Kimbell D3 SW", "Ft. Scott - South", "Rossi Park #1"],
+        "al_nl_split": True,
     },
     "Juniors": {
-        "teams": 6, "games": 9, "skip_weeks": ["11", "12", "13"], "time_length": "180", 
+        "teams": 6,
+        "games": 9,
+        "skip_weeks": ["11", "12", "13"],
+        "time_length": "180", 
         "denied_fields": ["Riordan"],
         "playoffs": None,
-    }
+        "al_nl_split": True,
+    },
+    "Challenger": {
+        "teams": 4,
+        "weekend_pattern": [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 0],
+        "preferred_days": ["Sunday"],
+        "time_length": "120",
+        "random_seed": 225,
+        "max_loops": 50,
+        "al_nl_split": False,
+    },
 }
 
 # https://sfrecpark.org/525/Individual-Field-Maps
 field_info = {
+    "Aptos - Field 1": {
+        "Region": "SF",
+        "Size": "46/60",
+        "Type": "grass",
+        "Infield":  "grass",
+    },
+    "Balboa - D2": {
+        "Region": "SF",
+        "Size": "46/60",
+        "Type": "grass",
+        "Infield":  "grass",
+    },
     "Christopher": {
+        "Region": "SF",
+        "Size": "46/60",
+        "Type": "grass",
+        "Infield":  "grass",
+    },
+    "Crocker Amazon - D2": {
         "Region": "SF",
         "Size": "46/60",
         "Type": "grass",
@@ -209,7 +240,7 @@ field_info = {
         "Type": "grass",
         "Infield":  "dirt",
     },
-    "Eureka": {"Region": "SF", "Size": "46/60", "Type": "grass", "Infield":  "dirt"},
+    "Eureka - Field 1": {"Region": "SF", "Size": "46/60", "Type": "grass", "Infield":  "dirt"},
     "Fort Scott - North Diamond": {
         "Region": "SF",
         "Size": "46/60",
@@ -283,7 +314,7 @@ field_info = {
         "Type": "grass",
         "Infield":  "dirt",
     },
-    "McCoppin": {
+    "McCoppin - Field 1": {
         "Region": "SF",
         "Size": "60/90",
         "Type": "grass",
@@ -307,13 +338,19 @@ field_info = {
         "Type": "grass",
         "Infield":  "grass",
     },
-    "Moscone D4": {
+    "Moscone - D4": {
         "Region": "SF",
         "Size": "60/90",
         "Type": "grass",
         "Infield":  "grass",
     },
     "Palega D2": {
+        "Region": "SF",
+        "Size": "46/60",
+        "Type": "grass",
+        "Infield":  "grass",
+    },
+    "Parkside - Field 1": {
         "Region": "SF",
         "Size": "46/60",
         "Type": "grass",
@@ -331,7 +368,13 @@ field_info = {
         "Type": "turf",
         "Infield":  "turf",
     },
-    "Potrero D2": {
+    "Potrero - D2": {
+        "Region": "SF",
+        "Size": "46/60",
+        "Type": "grass",
+        "Infield":  "dirt",
+    },
+    "Presidio Wall - Field 1": {
         "Region": "SF",
         "Size": "46/60",
         "Type": "grass",
@@ -379,7 +422,7 @@ field_info = {
         "Type": "turf",
         "Infield":  "turf",
     },
-    "Sunset Rec": {
+    "Sunset Rec - Diamond": {
         "Region": "SF",
         "Size": "46/60",
         "Type": "grass",
@@ -394,7 +437,7 @@ field_info = {
         "Type": "grass",
         "Infield":  "grass",
     },
-    "West Sunset #1": {
+    "West Sunset - Field 1": {
         "Region": "SF",
         "Size": "60/90",
         "Type": "grass",
@@ -565,6 +608,8 @@ team_names = {
         "Team 6": "Angels",
         "Team 7": "Diamondbacks",
         "Team 8": "Athletics",
+        "Team 9": "Team 9",
+        "Team 10": "Team 10",
     },
 
     "Majors": {

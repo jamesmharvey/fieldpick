@@ -51,7 +51,6 @@ pd.set_option("display.max_rows", None)
 division = "Minors AAA"
 teams = list_teams_for_division(division, tFrame)
 
-day_off = "Monday"
 duration = "150"
 last_week = "9"
 
@@ -70,13 +69,12 @@ division_not_set = pd.isna(cleanFrame["Division"]) == True
 slot_good_for_division = division_same | division_not_set
 
 before_last_week = pd.to_numeric(cleanFrame["Week_Number"]) <= int(last_week)
-not_day_off = cleanFrame["Day_of_Week"] != day_off
 not_opening_day = cleanFrame["Notes"] != "Opening Day Ceremony"
-non_blocked = not_opening_day & not_day_off & before_last_week
+non_blocked = not_opening_day & before_last_week
 
 
 # Prescribed slots
-divisions = [division, "Minors AA", "Rookie"]
+divisions = [division, "Majors"]
 prescribed_fields = cleanFrame["Intended_Division"].isin(divisions)
 print(f"Prescribed Slots2: {prescribed_fields.sum()}")
 prescribed = prescribed_fields
@@ -124,34 +122,32 @@ prob = minimum_faceoffs(prob, slots_vars, teams, slot_ids, limit=1)
 prob = limit_faceoffs(prob, slots_vars, teams, slot_ids, limit=2)
 prob = limit_games_per_week(prob, weeks, working_slots, slots_vars, teams, limit=2)
 
-prob = minimum_games_per_team(prob, teams, slots_vars, slot_ids, min_games=10)
-prob = maximum_games_per_team(prob, teams, slots_vars, slot_ids, max_games=12)
+prob = minimum_games_per_team(prob, teams, slots_vars, slot_ids, min_games=games_per_team)
+prob = maximum_games_per_team(prob, teams, slots_vars, slot_ids, max_games=games_per_team)
 
-prob = early_starts(prob, teams, slots_vars, early_slots, min=1, max=5)
+# # # Balance fields
+# prob = balance_fields(prob, teams, games_per_team, working_slots, slots_vars, fudge=1)
 
-# # Balance fields
-prob = balance_fields(prob, teams, games_per_team, working_slots, slots_vars, fudge=1)
+# # # Tepper Min
+# prob = field_limits(prob, teams, working_slots, slots_vars, "Tepper - Field 1", min=1, max=5, variation="TEPPER_MIN")
+# # prob = field_limits(prob, teams, working_slots, slots_vars, "Ketcham - Field 1", min=1, max=5, variation="KETCHAM_MIN")
 
-# # Tepper Min
-prob = field_limits(prob, teams, working_slots, slots_vars, "Tepper - Field 1", min=1, max=5, variation="TEPPER_MIN")
-prob = field_limits(prob, teams, working_slots, slots_vars, "Ketcham - Field 1", min=1, max=5, variation="KETCHAM_MIN")
-
-prob = min_weekends(prob, teams, working_slots, slots_vars, min=7)
+# prob = min_weekends(prob, teams, working_slots, slots_vars, min=7)
 
 
-# Prefer tepper on weekends
-tepper = ["Tepper - Field 1", "Ketcham - Field 1"]
-tepper_slots = working_slots[working_slots["Full_Field"].isin(tepper)].index
-tepper_weekend_slots = tepper_slots
-for j in teams:
-    prob += (
-        (
-            lpSum([slots_vars[i, j, k] for i in tepper_weekend_slots] for k in teams)  # home team on tepper weekend
-            + lpSum([slots_vars[i, k, j] for i in tepper_weekend_slots] for k in teams) # away team on tepper weekend
-        )
-        >= 9,
-        f"get_tepper_min_team_{j}",
-    )
+# # Prefer tepper on weekends
+# tepper = ["Tepper - Field 1", "Ketcham - Field 1"]
+# tepper_slots = working_slots[working_slots["Full_Field"].isin(tepper)].index
+# tepper_weekend_slots = tepper_slots
+# for j in teams:
+#     prob += (
+#         (
+#             lpSum([slots_vars[i, j, k] for i in tepper_weekend_slots] for k in teams)  # home team on tepper weekend
+#             + lpSum([slots_vars[i, k, j] for i in tepper_weekend_slots] for k in teams) # away team on tepper weekend
+#         )
+#         >= 4,
+#         f"get_tepper_min_team_{j}",
+#     )
 
 
 

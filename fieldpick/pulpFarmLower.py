@@ -10,6 +10,7 @@ from frametools import (
 from inputs import ( division_info)
 
 from pulp import LpProblem, LpVariable, LpMaximize, lpSum, PULP_CBC_CMD, LpStatus
+from pulpFunctions import minimum_games_per_team
 from collections import Counter
 import sys
 
@@ -22,6 +23,7 @@ from pulpFunctions import (
     common_constraints, solveMe, 
     limit_faceoffs,
     limit_games_per_week,
+    minimum_faceoffs,
     early_starts,
     field_limits, set_field_ratios
                            )
@@ -49,7 +51,7 @@ duration = "120"
 day_off = "Monday"
 last_week = "12"
 
-games_per_team = 11
+games_per_team = 10
 
 # Data cleanup
 cleanFrame = cFrame[cFrame["Week_Number"] != "UNKNOWN"].copy()
@@ -112,10 +114,13 @@ prob = common_constraints(prob, slots_vars, teams, slot_ids, working_slots)
 
 
 # Division Specific
-prob = limit_faceoffs(prob, slots_vars, teams, slot_ids)
+prob = minimum_faceoffs(prob, slots_vars, teams, slot_ids, limit=0)
+prob = limit_faceoffs(prob, slots_vars, teams, slot_ids, limit=1)
 prob = limit_games_per_week(prob, weeks, working_slots, slots_vars, teams, limit=1)
 
-prob = early_starts(prob, teams, slots_vars, early_slots, min=1, max=4)
+prob = minimum_games_per_team(prob, teams, slots_vars, slot_ids, min_games=games_per_team)
+
+prob = early_starts(prob, teams, slots_vars, early_slots, min=3, max=games_per_team)
 
 # Balance fields
 field_ratios = set_field_ratios(working_slots)

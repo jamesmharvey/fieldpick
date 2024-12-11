@@ -78,7 +78,8 @@ non_blocked = not_opening_day & not_day_off & before_last_week
 
 
 # Prescribed slots
-prescribed_fields = cleanFrame["Intended_Division"] == division
+divisions = [division, "Majors", "Minors AAA", "Minors AA"]
+prescribed_fields = cleanFrame["Intended_Division"].isin(divisions)
 print(f"Prescribed Slots: {prescribed_fields.sum()}")
 prescribed = prescribed_fields
 
@@ -134,7 +135,7 @@ prob = balance_fields(prob, teams, games_per_team, working_slots, slots_vars)
 
 # Tepper Min
 prob = field_limits(prob, teams, working_slots, slots_vars, "Tepper - Field 1", min=1, max=3, variation="TEPPER_MIN")
-prob = field_limits(prob, teams, working_slots, slots_vars, "Ketcham - Field 1", min=1, max=3, variation="KETCHAM_MIN")
+# prob = field_limits(prob, teams, working_slots, slots_vars, "Ketcham - Field 1", min=1, max=3, variation="KETCHAM_MIN")
 
 prob = min_weekends(prob, teams, working_slots, slots_vars, min=7)
 

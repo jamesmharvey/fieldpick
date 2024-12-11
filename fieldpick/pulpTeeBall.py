@@ -10,6 +10,7 @@ from frametools import (
 
 from inputs import ( division_info)
 from pulp import LpProblem, LpVariable, LpMaximize, lpSum, PULP_CBC_CMD, LpStatus
+from pulpFunctions import minimum_games_per_team, maximum_games_per_team
 from collections import Counter
 import sys
 
@@ -69,9 +70,7 @@ slot_good_for_division = division_same | division_not_set
 before_last_week = (pd.to_numeric(cleanFrame["Week_Number"]) <= int(last_week))
 not_day_off = cleanFrame["Day_of_Week"] != day_off
 
-# No tee ball at all on opening day (different from other divisions)
-not_opening_day = cleanFrame["Date"] != "2024-03-09"
-non_blocked = (not_opening_day & not_day_off & before_last_week)
+non_blocked = (not_day_off & before_last_week)
 
 # Prescribed slots
 prescribed_fields = cleanFrame["Intended_Division"] == division
@@ -115,11 +114,14 @@ prob += lpSum([slots_vars]), "Number of games played"
 # Common constraints
 prob = common_constraints(prob, slots_vars, teams, slot_ids, working_slots)
 
-# Division Specific
-prob = limit_faceoffs(prob, slots_vars, teams, slot_ids)
+# # Division Specific
+prob = limit_faceoffs(prob, slots_vars, teams, slot_ids, limit=1)
 prob = limit_games_per_week(prob, weeks, working_slots, slots_vars, teams, limit=1)
 
-prob = early_starts(prob, teams, slots_vars, early_slots, min=3, max=4)
+prob = minimum_games_per_team(prob, teams, slots_vars, slot_ids, min_games=games_per_team)
+prob = maximum_games_per_team(prob, teams, slots_vars, slot_ids, max_games=games_per_team)
+
+prob = early_starts(prob, teams, slots_vars, early_slots, min=2, max=games_per_team)
 
 # Balance fields
 prob = balance_fields(prob, teams, games_per_team, working_slots, slots_vars, fudge=1)

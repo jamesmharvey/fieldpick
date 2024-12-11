@@ -162,9 +162,9 @@ short_division_names = {
 }
 
 sports_connect_division_names = {
-    "Tee Ball": "TeeBall",
-    "Lower Farm": "LowerFarm",
-    "Upper Farm": "UpperFarm",
+    "Tee Ball": "TB",
+    "Lower Farm": "LF",
+    "Upper Farm": "UF",
     "Rookie": "Rookie",
     "Minors AA": "AA",
     "Minors AAA": "AAA",

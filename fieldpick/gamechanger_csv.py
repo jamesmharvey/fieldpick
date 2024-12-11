@@ -63,7 +63,7 @@ for slot in working_slots:
     if home == "Angels":
         home_str = f"SFLL Majors {home}"
     else:
-        home_str = f"SFLL Majors {home} Spring 2023"
+        home_str = f"SFLL Majors {home} Spring 2025"
 
     away = cFrame.loc[slot, "Away_Team_Name"]
     if away == "Athletics":
@@ -71,7 +71,7 @@ for slot in working_slots:
     if away == "Angels":
         away_str = f"SFLL Majors {away}"
     else:
-        away_str = f"SFLL Majors {away} Spring 2023"
+        away_str = f"SFLL Majors {away} Spring 2025"
 
     field = cFrame.loc[slot, "Field"]
     if "Kimbell" in field:

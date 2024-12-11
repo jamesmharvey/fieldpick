@@ -102,7 +102,7 @@ for division in divisionFrames.keys():
         if not os.path.exists(division):
             os.makedirs(division)
         #os.mkdir(division)
-        html.write_pdf(f"{division}/{division}_{team_name}_SFLL_Spring_2023_Schedule.pdf")
+        html.write_pdf(f"{division}/{division}_{team_name}_SFLL_Spring_2025_Schedule.pdf")
 
 
 
@@ -117,6 +117,6 @@ for division in divisionFrames.keys():
     for page in pdf_pages[1:]:
         page_one.pages.extend(page.pages)
 
-    page_one.write_pdf(f"SFLL_Spring_2023_Schedule_{division}.pdf")
+    page_one.write_pdf(f"SFLL_Spring_2025_Schedule_{division}.pdf")
 
 
