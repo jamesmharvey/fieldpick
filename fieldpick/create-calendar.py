@@ -24,8 +24,8 @@ special_schedule_dates = [
 ]
 
 # Datetime conversion for blackouts
-special_schedule_days = [datetime.strptime(date, "%m/%d/%Y") for date in special_schedule_dates]
-
+special_schedule_days = [datetime.strptime(
+    date, "%m/%d/%Y") for date in special_schedule_dates]
 
 
 ##################################################
@@ -248,7 +248,6 @@ cFrame = add_time_slots(
 )
 
 
-
 ##################################################
 # AA Minors
 
@@ -372,7 +371,7 @@ cFrame = add_time_slots(
     start_day="3/1/2025",
     end_day="5/2/2025",
     times=[
-        ("11:30", "14:00"),        
+        ("11:30", "14:00"),
     ],
     input=cFrame,
     blackout_days=special_schedule_days,
@@ -383,10 +382,10 @@ cFrame = add_time_slots(
     fields=["Field 1"],
     intended_division="Minors AAA",
     days_of_week=["Saturday"],
-    start_day="3/9/2025", # Start of Daylight Saving Time
+    start_day="3/9/2025",  # Start of Daylight Saving Time
     end_day="5/2/2025",
     times=[
-        ("16:30", "19:00"),        
+        ("16:30", "19:00"),
     ],
     input=cFrame,
 )
@@ -400,7 +399,7 @@ cFrame = add_time_slots(
     start_day="3/1/2025",
     end_day="5/2/2025",
     times=[
-        ("11:30", "14:00"),        
+        ("11:30", "14:00"),
     ],
     input=cFrame,
 )
@@ -413,7 +412,7 @@ cFrame = add_time_slots(
     start_day="3/1/2025",
     end_day="5/2/2025",
     times=[
-        ("09:00", "11:30"),        
+        ("09:00", "11:30"),
     ],
     input=cFrame,
 )
@@ -481,7 +480,7 @@ cFrame = add_time_slots(
     fields=["Field 1"],
     intended_division="Majors",
     days_of_week=["Saturday"],
-    start_day="3/8/2025", # Skip Week 1 so AAA can have the slot
+    start_day="3/8/2025",  # Skip Week 1 so AAA can have the slot
     end_day="5/2/2025",
     times=[
         ("09:00", "11:30"),
@@ -495,7 +494,7 @@ cFrame = add_time_slots(
     fields=["Field 1"],
     intended_division="Majors",
     days_of_week=["Saturday"],
-    start_day="3/9/2025", # Start of Daylight Saving Time
+    start_day="3/9/2025",  # Start of Daylight Saving Time
     end_day="5/2/2025",
     times=[
         ("16:30", "19:00"),
@@ -534,7 +533,7 @@ cFrame = add_time_slots(
     fields=["Field 1"],
     intended_division="Majors",
     days_of_week=["Sunday"],
-    start_day="3/9/2025", # Start of Daylight Saving Time
+    start_day="3/9/2025",  # Start of Daylight Saving Time
     end_day="5/2/2025",
     times=[
         ("16:30", "19:00"),
@@ -691,7 +690,7 @@ cFrame = add_time_slots(
     start_day="3/8/2025",
     end_day="5/18/2025",
     times=[
-        ("14:00","16:00"),
+        ("14:00", "16:00"),
     ],
     input=cFrame,
 )
@@ -704,7 +703,7 @@ cFrame = add_time_slots(
     start_day="3/8/2025",
     end_day="5/18/2025",
     times=[
-        ("14:00","16:00"),
+        ("14:00", "16:00"),
     ],
     input=cFrame,
 )
@@ -721,11 +720,12 @@ cFrame = add_time_slots(
 # - NO GAMES Challenger division only Sunday 5/11/25 - Mother’s Day
 #     This is done in assign_challenger.py
 
-cFrame = cFrame[cFrame["Date"] != "2025-04-20"] # No games Easter Sunday
+cFrame = cFrame[cFrame["Date"] != "2025-04-20"]  # No games Easter Sunday
 
 giants_day = "04/06/2025"
 
-cFrame = cFrame[cFrame["Date"] != "2025-04-06"] # No games Giants Sunday, except Challenger, added back here:
+# No games Giants Sunday, except Challenger, added back here:
+cFrame = cFrame[cFrame["Date"] != "2025-04-06"]
 
 cFrame = add_time_slots(
     locations=["Tepper"],
@@ -735,7 +735,7 @@ cFrame = add_time_slots(
     start_day=giants_day,
     end_day=giants_day,
     times=[
-        ("14:00","16:00"),
+        ("14:00", "16:00"),
     ],
     input=cFrame,
 )
@@ -748,12 +748,12 @@ cFrame = add_time_slots(
     start_day=giants_day,
     end_day=giants_day,
     times=[
-        ("14:00","16:00"),
+        ("14:00", "16:00"),
     ],
     input=cFrame,
 )
 
-## Special schedule for Giants Saturday and Easter Saturday
+# Special schedule for Giants Saturday and Easter Saturday
 
 
 for special_schedule_date in special_schedule_dates:
@@ -765,7 +765,7 @@ for special_schedule_date in special_schedule_dates:
         start_day=special_schedule_date,
         end_day=special_schedule_date,
         times=[
-            ("09:00","11:30"),
+            ("09:00", "11:30"),
         ],
         input=cFrame,
     )
@@ -778,7 +778,7 @@ for special_schedule_date in special_schedule_dates:
         start_day=special_schedule_date,
         end_day=special_schedule_date,
         times=[
-            ("11:30","14:00"),
+            ("11:30", "14:00"),
         ],
         input=cFrame,
     )
@@ -791,8 +791,8 @@ for special_schedule_date in special_schedule_dates:
         start_day=special_schedule_date,
         end_day=special_schedule_date,
         times=[
-            ("09:00","11:00"),
-            ("11:00","13:00"),
+            ("09:00", "11:00"),
+            ("11:00", "13:00"),
         ],
         input=cFrame,
     )
@@ -805,7 +805,7 @@ for special_schedule_date in special_schedule_dates:
         start_day=special_schedule_date,
         end_day=special_schedule_date,
         times=[
-            ("13:00","15:00"),
+            ("13:00", "15:00"),
         ],
         input=cFrame,
     )
@@ -818,19 +818,20 @@ for special_schedule_date in special_schedule_dates:
         start_day=special_schedule_date,
         end_day=special_schedule_date,
         times=[
-            ("09:00","11:00"),
-            ("11:00","13:00"),
+            ("09:00", "11:00"),
+            ("11:00", "13:00"),
         ],
         input=cFrame,
     )
 
-## Give AAA an extra slot on opening day, because they lose 3 opening weekend slots to the opening day ceremony and one to darkness
+# Give AAA an extra slot on opening day, because they lose 3 opening
+# weekend slots to the opening day ceremony and one to darkness
 cFrame = add_time_slots(
     locations=["Tepper"],
     fields=["Field 1"],
     intended_division="Minors AAA",
     days_of_week=["Saturday"],
-    start_day="3/1/2025", # Skip Week 1 so AAA can have the slot
+    start_day="3/1/2025",  # Skip Week 1 so AAA can have the slot
     end_day="3/1/2025",
     times=[
         ("09:00", "11:30"),
@@ -846,7 +847,17 @@ cFrame.sort_values(by=["Datestamp"], inplace=True, ignore_index=True)
 
 # Add Notes to early opening day slots to avoid scheduling
 opening_day = cFrame["Date"] == "2025-03-02"
-early_starts = ["08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "12:00", "12:30"]
+early_starts = [
+    "08:00",
+    "08:30",
+    "09:00",
+    "09:30",
+    "10:00",
+    "10:30",
+    "11:00",
+    "11:30",
+    "12:00",
+    "12:30"]
 early_slots = cFrame["Start"].isin(early_starts)
 opening_day_slots = opening_day & early_slots
 cFrame.loc[opening_day_slots, "Notes"] = "Opening Day Ceremony"

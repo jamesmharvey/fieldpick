@@ -32,21 +32,21 @@ logger = logging.getLogger()
 
 
 # Load calendar
-#logger.info("Loading calendar data")
+# logger.info("Loading calendar data")
 save_file = "data/calendar.pkl"
 cFrame = pd.read_pickle(save_file)
-#print(f"Loaded {len(cFrame)} slots")
+# print(f"Loaded {len(cFrame)} slots")
 
 
-majors = cFrame["Division"] == "Majors" 
+majors = cFrame["Division"] == "Majors"
 
 working_slots = cFrame[majors].index
-#print(f"Working with {len(working_slots)} slots")
+# print(f"Working with {len(working_slots)} slots")
 
 
 print("date,time,home,away,location,duration")
 for slot in working_slots:
-    #print(slot)
+    # print(slot)
 
     date_str = cFrame.loc[slot, "Date"]
     datetime_obj = datetime.strptime(date_str, '%Y-%m-%d')
@@ -55,7 +55,6 @@ for slot in working_slots:
     time_str = cFrame.loc[slot, "Game_Start"]
     datetime_obj = datetime.strptime(time_str, '%H:%M')
     new_time_str = datetime_obj.strftime('%-I:%M %p')
-
 
     home = cFrame.loc[slot, "Home_Team_Name"]
     if home == "Athletics":
@@ -85,10 +84,4 @@ for slot in working_slots:
     elif "Ketcham" in field:
         field += ", 8th Street, Avenue M, San Francisco, CA 94130"
 
-
-
     print(f"{new_date_str},{new_time_str},{home_str},{away_str},\"{field}\",120")
-
-
-
-

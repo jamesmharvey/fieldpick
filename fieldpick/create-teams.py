@@ -4,7 +4,10 @@ from inputs import division_info
 from frametools import save_frame
 from helpers import sports_connect_division_names
 
-logging.basicConfig(format="%(asctime)s  %(message)s", datefmt="%Y-%m-%d %H:%M:%S", level=logging.INFO)
+logging.basicConfig(
+    format="%(asctime)s  %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    level=logging.INFO)
 logger = logging.getLogger()
 
 tFrame = pd.DataFrame()
@@ -22,10 +25,11 @@ Challenger: Challenger_01 - Challenger_04
 
 """
 
+
 def sports_connect_team_numbers_and_names(division):
     all_teams = division_info[division]["teams"]
     if division_info[division].get("al_nl_split", False):
-        half_teams = int(all_teams/2)
+        half_teams = int(all_teams / 2)
         for i in range(half_teams):
             yield (i + 1, f"{sports_connect_division_names[division]}_AL_{i + 1:02d}")
         for i in range(half_teams, all_teams):
@@ -34,10 +38,14 @@ def sports_connect_team_numbers_and_names(division):
         for i in range(all_teams):
             yield (i + 1, f"{sports_connect_division_names[division]}_{i + 1:02d}")
 
+
 for division in division_info:
     logger.info(f"Division: {division}")
-    logger.info(f"Generating {division_info[division]['teams']} teams for {division}")
-    for team_number, team_name in sports_connect_team_numbers_and_names(division):
+    logger.info(
+        f"Generating {
+            division_info[division]['teams']} teams for {division}")
+    for team_number, team_name in sports_connect_team_numbers_and_names(
+            division):
         new_row = pd.DataFrame(
             {
                 "Division": division,
