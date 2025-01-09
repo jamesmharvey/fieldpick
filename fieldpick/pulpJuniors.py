@@ -27,6 +27,8 @@ from pulpFunctions import (
     minimum_games_per_team,
     maximum_games_per_team,
     min_weekends,
+    min_games_per_week,
+    no_6_in_21,
     solveMe,
 )
 
@@ -53,7 +55,7 @@ day_off = "Monday"
 duration = "180"
 last_week = "9"
 
-games_per_team = 12
+games_per_team = 15
 
 # Data cleanup
 cleanFrame = cFrame[cFrame["Week_Number"] != "UNKNOWN"].copy()
@@ -118,8 +120,8 @@ prob += lpSum([slots_vars])
 prob = common_constraints(prob, slots_vars, teams, slot_ids, working_slots)
 
 # Division Specific
-prob = minimum_faceoffs(prob, slots_vars, teams, slot_ids, limit=2)
-prob = limit_faceoffs(prob, slots_vars, teams, slot_ids, limit=3)
+prob = minimum_faceoffs(prob, slots_vars, teams, slot_ids, limit=3)
+prob = limit_faceoffs(prob, slots_vars, teams, slot_ids, limit=7)
 prob = limit_games_per_week(
     prob,
     weeks,
@@ -128,10 +130,10 @@ prob = limit_games_per_week(
     teams,
     limit=2)
 
-prob = minimum_games_per_team(prob, teams, slots_vars, slot_ids, min_games=13)
-prob = maximum_games_per_team(prob, teams, slots_vars, slot_ids, max_games=14)
+prob = minimum_games_per_team(prob, teams, slots_vars, slot_ids, min_games=games_per_team)
+prob = maximum_games_per_team(prob, teams, slots_vars, slot_ids, max_games=games_per_team)
 
-prob = early_starts(prob, teams, slots_vars, early_slots, min=1, max=8)
+prob = early_starts(prob, teams, slots_vars, early_slots, min=1, max=9)
 
 # # # Balance fields
 prob = balance_fields(
@@ -142,8 +144,39 @@ prob = balance_fields(
     slots_vars,
     fudge=2)
 
-prob = min_weekends(prob, teams, working_slots, slots_vars, min=5)
+prob = field_limits(
+    prob,
+    teams,
+    working_slots,
+    slots_vars,
+    "McCoppin - Field 1",
+    min=5,
+    max=6,
+    variation="MCCOPPIN_FIELD_1")
 
+prob = field_limits(
+    prob,
+    teams,
+    working_slots,
+    slots_vars,
+    "Moscone - D4",
+    min=3,
+    max=3,
+    variation="MOSCONE_D4")
+
+prob = field_limits(
+    prob,
+    teams,
+    working_slots,
+    slots_vars,
+    "Paul Goode - Main",
+    min=2,
+    max=2,
+    variation="PAUL_GOODE_MAIN")
+
+prob = min_weekends(prob, teams, working_slots, slots_vars, min=5)
+prob = min_games_per_week(prob, teams, working_slots, slots_vars, min=1)
+# prob = no_6_in_21(prob, teams, working_slots, slots_vars)
 
 prob = solveMe(prob, working_slots)
 clear_division(cFrame, division)

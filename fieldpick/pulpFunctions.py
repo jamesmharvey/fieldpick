@@ -3,6 +3,8 @@ import sys
 import logging
 import math
 import pickle
+from pulp import LpProblem
+from pandas import DataFrame
 
 
 logging.basicConfig(
@@ -16,7 +18,7 @@ WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
 
 
 # Common constraints for all divisions
-def common_constraints(prob, slots_vars, teams, slot_ids, working_slots):
+def common_constraints(prob: LpProblem, slots_vars, teams, slot_ids, working_slots: DataFrame):
 
     days_of_year = working_slots["Day_of_Year"].unique()
 
@@ -50,18 +52,18 @@ def common_constraints(prob, slots_vars, teams, slot_ids, working_slots):
     return prob
 
 
-def same_opponent(prob, slots_vars, teams, slot_ids):
+def same_opponent(prob: LpProblem, slots_vars, teams, slot_ids):
     # Minimize games played against a single opponent
     for k in teams:
         for j in teams:
-            if i != j:
+            if k != j:
                 prob += lpSum([slots_vars[i, j, k] + slots_vars[i, k, j]
                               for i in slot_ids]) <= 1, f"Max_faceoffs_{k}_vs_{j}"
 
     return prob
 
 
-def one_game_per_slot(prob, slots_vars, teams, slot_ids):
+def one_game_per_slot(prob: LpProblem, slots_vars, teams, slot_ids):
     # 1 game per slot
     for i in slot_ids:
         prob += lpSum([slots_vars[i, j, k] for j in teams for k in teams]
@@ -69,7 +71,7 @@ def one_game_per_slot(prob, slots_vars, teams, slot_ids):
     return prob
 
 
-def cannot_play_yourself(prob, slots_vars, teams, slot_ids):
+def cannot_play_yourself(prob: LpProblem, slots_vars, teams, slot_ids):
     # Cannot play self
     for i in slot_ids:
         prob += lpSum([slots_vars[i, j, j]
@@ -77,7 +79,7 @@ def cannot_play_yourself(prob, slots_vars, teams, slot_ids):
     return prob
 
 
-def minimum_games_per_team(prob, teams, slots_vars, slot_ids, min_games=11):
+def minimum_games_per_team(prob: LpProblem, teams, slots_vars, slot_ids, min_games=11):
     # Each team must play at least $min_games
     for j in teams:
         prob += (
@@ -87,7 +89,7 @@ def minimum_games_per_team(prob, teams, slots_vars, slot_ids, min_games=11):
     return prob
 
 
-def maximum_games_per_team(prob, teams, slots_vars, slot_ids, max_games=11):
+def maximum_games_per_team(prob: LpProblem, teams, slots_vars, slot_ids, max_games=11):
     # Each team must play at least $min_games
     for j in teams:
         prob += (
@@ -97,7 +99,7 @@ def maximum_games_per_team(prob, teams, slots_vars, slot_ids, max_games=11):
     return prob
 
 
-def minimum_faceoffs(prob, slots_vars, teams, slot_ids, limit=1):
+def minimum_faceoffs(prob: LpProblem, slots_vars, teams, slot_ids, limit=1):
     # No team should play another team more than once
     for j in teams:
         for k in teams:
@@ -109,7 +111,7 @@ def minimum_faceoffs(prob, slots_vars, teams, slot_ids, limit=1):
     return prob
 
 
-def limit_faceoffs(prob, slots_vars, teams, slot_ids, limit=1):
+def limit_faceoffs(prob: LpProblem, slots_vars, teams, slot_ids, limit=1):
     # No team should play another team more than once
     for j in teams:
         for k in teams:
@@ -121,7 +123,7 @@ def limit_faceoffs(prob, slots_vars, teams, slot_ids, limit=1):
     return prob
 
 
-def everyone_plays_week1(prob, teams, working_slots, slots_vars, limit=1):
+def everyone_plays_week1(prob: LpProblem, teams, working_slots, slots_vars, limit=1):
     weeks = ["Week 1"]
     for week in weeks:
         thisweek = working_slots[working_slots["Week_Name"] == week].index
@@ -138,7 +140,7 @@ def everyone_plays_week1(prob, teams, working_slots, slots_vars, limit=1):
     return prob
 
 
-def limit_3_in_5(prob, days_of_year, working_slots, slots_vars, teams):
+def limit_3_in_5(prob: LpProblem, days_of_year, working_slots, slots_vars, teams):
     # 3 games in 5 days
     for day in days_of_year:
         this_day = working_slots[working_slots["Day_of_Year"] == day].index
@@ -190,7 +192,7 @@ def limit_3_in_5(prob, days_of_year, working_slots, slots_vars, teams):
     return prob
 
 
-def limit_3_in_6(prob, days_of_year, working_slots, slots_vars, teams):
+def limit_3_in_6(prob: LpProblem, days_of_year, working_slots, slots_vars, teams):
     # 3 games in 6 days
     for day in days_of_year:
         this_day = working_slots[working_slots["Day_of_Year"] == day].index
@@ -205,9 +207,9 @@ def limit_3_in_6(prob, days_of_year, working_slots, slots_vars, teams):
         sixth_day = working_slots[working_slots["Day_of_Year"] == str(
             int(day) + 5)].index
         for j in teams:
-            # This is a bogus hack
-            if "02" in j:
-                continue
+            # # This is a bogus hack
+            # if "02" in j:
+            #     continue
             prob += (
                 (
                     lpSum([slots_vars[i, j, k]
@@ -252,8 +254,26 @@ def limit_3_in_6(prob, days_of_year, working_slots, slots_vars, teams):
             )
     return prob
 
+def no_6_in_21(prob: LpProblem, teams, working_slots, slots_vars):
+    # No team can play more than 5 games in 21 days
+    days_of_year = working_slots["Day_of_Year"].unique()
+    for day in days_of_year:
+        this_day = working_slots[working_slots["Day_of_Year"] == day].index
+        next_days = [working_slots[working_slots["Day_of_Year"] == str(int(day) + i)].index for i in range(1, 21)]
+        for j in teams:
+            prob += (
+                (
+                    lpSum([slots_vars[i, j, k] for i in this_day for k in teams])
+                    + lpSum([slots_vars[i, k, j] for i in this_day for k in teams])
+                    + sum(lpSum([slots_vars[i, j, k] for i in next_day for k in teams])
+                            + lpSum([slots_vars[i, k, j] for i in next_day for k in teams]) for next_day in next_days)
+                )
+                <= 5,
+                f"Max_five_twentyone_{day}_team_{j}",
+            )
+    return prob
 
-def no_back_to_back(prob, days_of_year, working_slots, slots_vars, teams):
+def no_back_to_back(prob: LpProblem, days_of_year, working_slots, slots_vars, teams):
     # No team can play back to back games
     for day in days_of_year:
         this_day = working_slots[working_slots["Day_of_Year"] == day].index
@@ -282,7 +302,7 @@ def no_back_to_back(prob, days_of_year, working_slots, slots_vars, teams):
 
 
 def limit_games_per_day(
-        prob,
+        prob: LpProblem,
         days_of_year,
         working_slots,
         slots_vars,
@@ -305,9 +325,22 @@ def limit_games_per_day(
             )
     return prob
 
+def min_games_per_week(prob: LpProblem, teams, working_slots, slots_vars, min=1, start_week=2, end_week=9):
+    weeks = working_slots["Week_Name"].unique()
+
+    for week in weeks:
+        week_number = int(week.split()[-1])
+        if start_week <= week_number <= end_week:
+            thisweek = working_slots[working_slots["Week_Name"] == week].index
+            for j in teams:
+                prob += (
+                    lpSum([slots_vars[i, j, k] for i in thisweek for k in teams])
+                    + lpSum([slots_vars[i, k, j] for i in thisweek for k in teams])
+                ) >= min, f"Min_{min}_games_per_week_in_{week}_team_{j}"
+    return prob
 
 def limit_games_per_week(
-        prob,
+        prob: LpProblem,
         weeks,
         working_slots,
         slots_vars,
@@ -328,7 +361,7 @@ def limit_games_per_week(
 
 
 def limit_games_per_team(
-        prob,
+        prob: LpProblem,
         teams,
         slots_vars,
         slot_ids,
@@ -341,7 +374,7 @@ def limit_games_per_team(
     return prob
 
 
-def early_starts(prob, teams, slots_vars, early_slots, min=3, max=4):
+def early_starts(prob: LpProblem, teams, slots_vars, early_slots, min=3, max=4):
     for j in teams:
         prob += (
             lpSum([slots_vars[i, j, k] for i in early_slots for k in teams])
@@ -354,8 +387,16 @@ def early_starts(prob, teams, slots_vars, early_slots, min=3, max=4):
         ) <= max, f"max_early_games_for_team_{j}"
     return prob
 
+def min_home_games(prob: LpProblem, teams, working_slots, slots_vars, min_games=5):
+    # Each team must play at least $min_games home games
+    slot_ids = working_slots.index
+    for j in teams:
+        prob += (
+            lpSum([slots_vars[i, j, k] for i in slot_ids for k in teams])
+        ) >= min_games, f"min_home_games_per_team_{j}"
+    return prob
 
-def min_weekends(prob, teams, working_slots, slots_vars, min=1):
+def min_weekends(prob: LpProblem, teams, working_slots, slots_vars, min=1):
     weekends = ["Saturday", "Sunday"]
     weekend_slots = working_slots[working_slots["Day_of_Week"].isin(
         weekends)].index
@@ -372,9 +413,23 @@ def min_weekends(prob, teams, working_slots, slots_vars, min=1):
         )
     return prob
 
+def max_weekends(prob: LpProblem, teams, working_slots, slots_vars, max=12):
+    weekends = ["Saturday", "Sunday"]
+    weekend_slots = working_slots[working_slots["Day_of_Week"].isin(weekends)].index
+    for j in teams:
+        prob += (
+            (
+                lpSum([slots_vars[i, j, k] for i in weekend_slots for k in teams])
+                + lpSum([slots_vars[i, k, j] for i in weekend_slots for k in teams])
+            )
+            <= max,
+            f"max_weekend_games_team_{j}",
+        )
+    return prob
+
 
 def min_weekday(
-        prob,
+        prob: LpProblem,
         teams,
         working_slots,
         slots_vars,
@@ -398,7 +453,7 @@ def min_weekday(
 
 
 def max_weekday(
-        prob,
+        prob: LpProblem,
         teams,
         working_slots,
         slots_vars,
@@ -420,9 +475,38 @@ def max_weekday(
         )
     return prob
 
+def min_ti(prob: LpProblem, teams, working_slots, slots_vars, min):
+    # Ensure each team has a minimum number of games in region TI
+    ti_slots = working_slots[working_slots["Region"] == "TI"].index
+    for j in teams:
+        prob += (
+            lpSum([slots_vars[i, j, k] for i in ti_slots for k in teams])
+            + lpSum([slots_vars[i, k, j] for i in ti_slots for k in teams])
+        ) >= min, f"min_ti_games_for_team_{j}"
+    return prob
+
+def max_ti(prob: LpProblem, teams, working_slots, slots_vars, max):
+    # Ensure each team has a minimum number of games in region TI
+    ti_slots = working_slots[working_slots["Region"] == "TI"].index
+    for j in teams:
+        prob += (
+            lpSum([slots_vars[i, j, k] for i in ti_slots for k in teams])
+            + lpSum([slots_vars[i, k, j] for i in ti_slots for k in teams])
+        ) <= max, f"max_ti_games_for_team_{j}"
+    return prob
+
+def max_ti_weekdays(prob: LpProblem, teams, working_slots, slots_vars, max):
+    # Ensure each team has a maximum number of games in region TI on weekdays
+    ti_weekday_slots = working_slots[(working_slots["Region"] == "TI") & (working_slots["Day_of_Week"].isin(WEEKDAYS))].index
+    for j in teams:
+        prob += (
+            lpSum([slots_vars[i, j, k] for i in ti_weekday_slots for k in teams])
+            + lpSum([slots_vars[i, k, j] for i in ti_weekday_slots for k in teams])
+        ) <= max, f"max_ti_weekday_games_for_team_{j}"
+    return prob
 
 def limit_weekday_games_per_week(
-        prob,
+        prob: LpProblem,
         teams,
         working_slots,
         slots_vars,
@@ -447,17 +531,17 @@ def limit_weekday_games_per_week(
 
 
 def field_limits(
-        prob,
-        teams,
-        working_slots,
-        slots_vars,
-        field,
-        min,
-        max,
-        variation=""):
+    prob: LpProblem,
+    teams,
+    working_slots,
+    slots_vars,
+    field,
+    min,
+    max,
+    variation=""):
     # set limits on field counts
     field_slots = working_slots[working_slots["Full_Field"].isin([
-                                                                 field])].index
+                                 field])].index
 
     for j in teams:
         prob += (
@@ -483,7 +567,7 @@ def set_field_ratios(working_slots):
 
 
 def balance_fields(
-        prob,
+        prob: LpProblem,
         teams,
         games_per_team,
         working_slots,
@@ -504,7 +588,7 @@ def balance_fields(
     return prob
 
 
-def solveMe(prob, working_slots):
+def solveMe(prob: LpProblem, working_slots):
 
     # Load prior solutions
     prob = load_solution(prob)

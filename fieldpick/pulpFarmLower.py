@@ -137,7 +137,7 @@ prob = early_starts(
     slots_vars,
     early_slots,
     min=3,
-    max=games_per_team)
+    max=4)
 
 # Balance fields
 field_ratios = set_field_ratios(working_slots)

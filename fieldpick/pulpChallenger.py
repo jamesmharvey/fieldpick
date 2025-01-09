@@ -145,7 +145,7 @@ for field in field_ratios:
         field,
         min,
         max)
-
+    
 
 # Solve (quietly)
 prob = solveMe(prob, working_slots)

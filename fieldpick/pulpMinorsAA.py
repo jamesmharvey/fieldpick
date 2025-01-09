@@ -28,6 +28,11 @@ from pulpFunctions import (
     maximum_games_per_team,
     min_weekends,
     min_weekday,
+    min_ti,
+    max_ti,
+    min_home_games,
+    no_6_in_21,
+    min_games_per_week,
     solveMe,
 )
 
@@ -83,8 +88,15 @@ print(f"Prescribed Slots2: {prescribed_fields.sum()}")
 prescribed = prescribed_fields
 
 
+# No AA or Rookie games on TI on weekdays
+treasure_island_fields = ["Tepper - Field 1", "Ketcham - Field 1"]
+weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+is_treasure_island = cleanFrame["Region"] == "TI"
+is_weekday = cleanFrame["Day_of_Week"].isin(weekdays)
+not_treasure_island_weekday = ~(is_treasure_island & is_weekday)
+
 # Combined filters
-slot_mask = correct_time & non_blocked & slot_good_for_division & prescribed
+slot_mask = correct_time & non_blocked & slot_good_for_division & prescribed & not_treasure_island_weekday
 working_slots = cleanFrame[slot_mask]
 
 if len(working_slots) < 1:
@@ -114,8 +126,25 @@ slots_vars = LpVariable.dicts("Slot", combinations, cat="Binary")
 _division = division.replace(" ", "_")
 prob = LpProblem(f"League_Scheduling_{_division}", LpMaximize)
 
-# objective maximize number of slots used
-prob += lpSum([slots_vars]), "Number of games played"
+# objective maximize number of slots used at desired fields, and prefer
+# weekends
+
+desired_field = [
+    "Tepper - Field 1",
+    "West Sunset - Field 3",
+    "South Sunset - Diamond 1",
+    "South Sunset - Diamond 2",
+    ]
+desired_slots = working_slots[working_slots["Full_Field"].isin(
+    desired_field)].index
+
+# Prefer weekend slots
+weekends = ["Saturday", "Sunday"]
+weekend_slots = working_slots[working_slots["Day_of_Week"].isin(
+    weekends)].index
+prob += lpSum([10 * slots_vars[i, h, a] for i in desired_slots for h in teams for a in teams]) + \
+    lpSum([slots_vars[i, h, a] for i in weekend_slots for h in teams for a in teams]), "Combined objective: desired fields and weekend slots"
+
 
 # Common constraints
 prob = common_constraints(prob, slots_vars, teams, slot_ids, working_slots)
@@ -130,10 +159,13 @@ prob = limit_games_per_week(
     slots_vars,
     teams,
     limit=2)
-prob = minimum_games_per_team(prob, teams, slots_vars, slot_ids, min_games=11)
+prob = minimum_games_per_team(prob, teams, slots_vars, slot_ids, min_games=12)
 prob = maximum_games_per_team(prob, teams, slots_vars, slot_ids, max_games=12)
 
-prob = early_starts(prob, teams, slots_vars, early_slots, min=0, max=5)
+prob = early_starts(prob, teams, slots_vars, early_slots, min=1, max=2)
+
+# Ensure each team has at least half of their games as home games
+prob = min_home_games(prob, teams, working_slots, slots_vars, min_games=games_per_team // 2)
 
 # Balance fields
 prob = balance_fields(
@@ -152,7 +184,7 @@ prob = field_limits(
     slots_vars,
     "Tepper - Field 1",
     min=1,
-    max=5,
+    max=2,
     variation="TEPPER_MIN")
 prob = field_limits(
     prob,
@@ -160,52 +192,45 @@ prob = field_limits(
     working_slots,
     slots_vars,
     "Ketcham - Field 1",
-    min=1,
-    max=5,
+    min=2,
+    max=3,
     variation="KETCHAM_MIN")
 
-prob = min_weekends(prob, teams, working_slots, slots_vars, min=7)
-prob = min_weekday(
+# Ensure at least one game at West Sunset - Field 3
+prob = field_limits(
     prob,
     teams,
     working_slots,
     slots_vars,
-    weekday="Saturday",
-    min=1)
+    "West Sunset - Field 3",
+    min=1,
+    max=3,
+    variation="WEST_SUNSET_MIN")
 
+# Ensure at least one game at South Sunset - Diamond 1
+prob = field_limits(
+    prob,
+    teams,
+    working_slots,
+    slots_vars,
+    "South Sunset - Diamond 1",
+    min=1,
+    max=3,
+    variation="SOUTH_SUNSET_MIN")
 
-# Prefer tepper on weekends
-tepper = ["Tepper - Field 1", "Ketcham - Field 1"]
-tepper_slots = working_slots[working_slots["Full_Field"].isin(tepper)].index
-tepper_weekend_slots = tepper_slots
-for j in teams:
-    prob += (
-        (
-            lpSum([slots_vars[i, j, k] for i in tepper_weekend_slots]
-                  for k in teams)  # home team on tepper weekend
-            + lpSum([slots_vars[i, k, j] for i in tepper_weekend_slots]
-                    for k in teams)  # away team on tepper weekend
-        )
-        <= 5,
-        f"get_tepper_min_team_{j}",
-    )
+prob = min_weekends(prob, teams, working_slots, slots_vars, min=7)
+# prob = min_weekday(
+#     prob,
+#     teams,
+#     working_slots,
+#     slots_vars,
+#     weekday="Saturday",
+#     min=1)
 
-# Prefer X
-location = ["Tepper - Field 1", "Ketcham - Field 1"]
-location_slots = working_slots[working_slots["Full_Field"].isin(tepper)].index
-tepper_weekend_slots = location_slots
-for j in teams:
-    prob += (
-        (
-            lpSum([slots_vars[i, j, k] for i in tepper_weekend_slots]
-                  for k in teams)  # home team on tepper weekend
-            + lpSum([slots_vars[i, k, j] for i in tepper_weekend_slots]
-                    for k in teams)  # away team on tepper weekend
-        )
-        >= 1,
-        f"custom_get_tepper_min_team_{j}",
-    )
-
+prob = min_ti(prob, teams, working_slots, slots_vars, min=3)
+prob = max_ti(prob, teams, working_slots, slots_vars, max=4)
+prob = no_6_in_21(prob, teams, working_slots, slots_vars)
+prob = min_games_per_week(prob, teams, working_slots, slots_vars, min=1)
 
 prob = solveMe(prob, working_slots)
 clear_division(cFrame, division)
@@ -259,6 +284,5 @@ for v in prob.variables():
 # Balance hack
 for i in range(100):
     balance_home_away(cFrame)
-
 
 save_frame(cFrame, "calendar.pkl")

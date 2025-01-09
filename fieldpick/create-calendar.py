@@ -347,8 +347,8 @@ cFrame = add_time_slots(
 
 # Friday
 cFrame = add_time_slots(
-    locations=["Fort Scott"],
-    fields=["North Diamond"],
+    locations=["South Sunset"],
+    fields=["Diamond 2"],
     intended_division="Minors AA",
     days_of_week=["Friday"],
     start_day="3/10/2025",
@@ -598,8 +598,8 @@ cFrame = add_time_slots(
 
 # Friday
 cFrame = add_time_slots(
-    locations=["South Sunset"],
-    fields=["Diamond 2"],
+    locations=["Fort Scott"],
+    fields=["North Diamond"],
     intended_division="Majors",
     days_of_week=["Friday"],
     start_day="3/10/2025",
@@ -657,7 +657,7 @@ cFrame = add_time_slots(
     fields=["Field 1"],
     intended_division="Juniors",
     days_of_week=["Tuesday", "Wednesday"],
-    start_day="3/1/2025",
+    start_day="3/9/2025",
     end_day="5/2/2025",
     times=[
         ("17:00", "20:00"),
@@ -669,8 +669,8 @@ cFrame = add_time_slots(
     locations=["Crocker Amazon"],
     fields=["D2"],
     intended_division="Juniors",
-    days_of_week=["Wednedsay"],
-    start_day="3/1/2025",
+    days_of_week=["Wednesday"],
+    start_day="3/9/2025",
     end_day="5/2/2025",
     times=[
         ("17:00", "20:00"),
@@ -840,6 +840,45 @@ cFrame = add_time_slots(
     blackout_days=special_schedule_days,
 )
 
+# Give Rookie an extra Tepper slot so every team can have two games there.
+
+# Change the Sunday, March 16 11:30-14:00 Tepper game from AAA to Rookie
+cFrame.loc[
+    (cFrame["Date"] == "2025-03-16") & 
+    (cFrame["Start"] == "11:30") & 
+    (cFrame["End"] == "14:00") & 
+    (cFrame["Location"] == "Tepper") & 
+    (cFrame["Field"] == "Field 1"), 
+    "Intended_Division"
+] = "Rookie"
+
+# Change the Sunday, March 16 11:30-14:00 Ketcham game from Rookie to AAA
+cFrame.loc[
+    (cFrame["Date"] == "2025-03-16") & 
+    (cFrame["Start"] == "11:30") & 
+    (cFrame["End"] == "14:00") & 
+    (cFrame["Location"] == "Ketcham") & 
+    (cFrame["Field"] == "Field 1"), 
+    "Intended_Division"
+] = "Minors AAA"
+
+# Change the Sunday, March 23 11:30-14:00 Tepper game from its current division to AA
+cFrame.loc[
+    (cFrame["Date"] == "2025-03-23") & 
+    (cFrame["Start"] == "11:30") & 
+    (cFrame["Location"] == "Tepper") & 
+    (cFrame["Field"] == "Field 1"), 
+    "Intended_Division"
+] = "Minors AA"
+
+# Change the Sunday, March 23 14:00-16:30 Ketcham game from its current division to AAA
+cFrame.loc[
+    (cFrame["Date"] == "2025-03-23") & 
+    (cFrame["Start"] == "14:00") & 
+    (cFrame["Location"] == "Ketcham") & 
+    (cFrame["Field"] == "Field 1"), 
+    "Intended_Division"
+] = "Minors AAA"
 
 # ##################################################
 # # Cleanup

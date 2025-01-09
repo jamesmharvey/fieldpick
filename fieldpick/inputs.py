@@ -220,7 +220,7 @@ field_info = {"Aptos - Field 1": {"Region": "SF",
                               "Infield": "grass",
                               },
               "Crocker Amazon - D2": {"Region": "SF",
-                                      "Size": "46/60",
+                                      "Size": "60/90", # 46/60 or 60/90
                                       "Type": "grass",
                                       "Infield": "grass",
                                       },

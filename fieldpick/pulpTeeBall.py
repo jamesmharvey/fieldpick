@@ -26,6 +26,7 @@ from pulpFunctions import (
     limit_games_per_week,
     early_starts,
     balance_fields,
+    field_limits,
     solveMe
 )
 
@@ -108,8 +109,19 @@ slots_vars = LpVariable.dicts("Slot", combinations, cat="Binary")
 _division = division.replace(" ", "_")
 prob = LpProblem(f"League_Scheduling_{_division}", LpMaximize)
 
-# objective maximize number of slots used
-prob += lpSum([slots_vars]), "Number of games played"
+# objective maximize number of slots used at desired fields, and prefer
+# weekends
+
+desired_field = ["Paul Goode - Practice"]
+desired_slots = working_slots[working_slots["Full_Field"].isin(
+    desired_field)].index
+
+# Prefer weekend slots
+weekends = ["Saturday", "Sunday"]
+weekend_slots = working_slots[working_slots["Day_of_Week"].isin(
+    weekends)].index
+prob += lpSum([10 * slots_vars[i, h, a] for i in desired_slots for h in teams for a in teams]) + \
+    lpSum([slots_vars[i, h, a] for i in weekend_slots for h in teams for a in teams]), "Combined objective: desired fields and weekend slots"
 
 # Common constraints
 prob = common_constraints(prob, slots_vars, teams, slot_ids, working_slots)
@@ -143,7 +155,7 @@ prob = early_starts(
     slots_vars,
     early_slots,
     min=2,
-    max=games_per_team)
+    max=3)
 
 # Balance fields
 prob = balance_fields(
@@ -154,6 +166,15 @@ prob = balance_fields(
     slots_vars,
     fudge=1)
 
+prob = field_limits(
+    prob,
+    teams,
+    working_slots,
+    slots_vars,
+    "Paul Goode - Practice",
+    min=3,
+    max=5,
+    variation="PAUL_GOODE_PRACTICE")
 
 # Solve (quietly)
 prob = solveMe(prob, working_slots)
