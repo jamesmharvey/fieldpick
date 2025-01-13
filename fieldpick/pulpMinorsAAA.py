@@ -196,17 +196,6 @@ prob = field_limits(
     max=3,
     variation="WEST_SUNSET_MIN")
 
-# Ensure at least one game at South Sunset - Diamond 1
-prob = field_limits(
-    prob,
-    teams,
-    working_slots,
-    slots_vars,
-    "South Sunset - Diamond 1",
-    min=1,
-    max=3,
-    variation="SOUTH_SUNSET_MIN")
-
 prob = min_weekends(prob, teams, working_slots, slots_vars, min=7)
 
 prob = min_ti(prob, teams, working_slots, slots_vars, min=9)

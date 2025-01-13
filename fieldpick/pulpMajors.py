@@ -122,6 +122,7 @@ prob = LpProblem(f"League_Scheduling_{_division}", LpMaximize)
 desired_field = [
     "Tepper - Field 1",
     "West Sunset - Field 3",
+    "South Sunset - Diamond 1"
     ]
 desired_slots = working_slots[working_slots["Full_Field"].isin(
     desired_field)].index
@@ -175,6 +176,17 @@ prob = field_limits(
     min=8,
     max=9,
     variation="TEPPER_LIMIT")
+
+# Ensure at least one game at South Sunset - Diamond 1
+prob = field_limits(
+    prob,
+    teams,
+    working_slots,
+    slots_vars,
+    "South Sunset - Diamond 1",
+    min=1,
+    max=3,
+    variation="SOUTH_SUNSET_MIN")
 
 prob = min_weekends(prob, teams, working_slots, slots_vars, min=7)
 prob = max_weekends(prob, teams, working_slots, slots_vars, max=8)

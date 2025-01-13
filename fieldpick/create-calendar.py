@@ -458,8 +458,8 @@ cFrame = add_time_slots(
 )
 
 cFrame = add_time_slots(
-    locations=["South Sunset"],
-    fields=["Diamond 1"],
+    locations=["Fort Scott"],
+    fields=["North Diamond"],
     intended_division="Minors AAA",
     days_of_week=["Friday"],
     start_day="3/10/2025",
@@ -598,8 +598,8 @@ cFrame = add_time_slots(
 
 # Friday
 cFrame = add_time_slots(
-    locations=["Fort Scott"],
-    fields=["North Diamond"],
+    locations=["South Sunset"],
+    fields=["Diamond 1"],
     intended_division="Majors",
     days_of_week=["Friday"],
     start_day="3/10/2025",

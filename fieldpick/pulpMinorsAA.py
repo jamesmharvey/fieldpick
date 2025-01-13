@@ -215,7 +215,7 @@ prob = field_limits(
     slots_vars,
     "South Sunset - Diamond 1",
     min=1,
-    max=3,
+    max=2,
     variation="SOUTH_SUNSET_MIN")
 
 prob = min_weekends(prob, teams, working_slots, slots_vars, min=7)
